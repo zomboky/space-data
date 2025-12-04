@@ -1,0 +1,38 @@
+# ----------------- CECI EST POUR LES DONNÉES OMNI -----------------
+
+# Dossier principal contenant les fichiers OMNI
+base_folder = "Donnees_Spatiales/OMNI_DATA"
+
+# Liste pour accumuler les DataFrames
+df_list = []
+
+# Parcours direct du dossier OMNI_DATA
+for file in os.listdir(base_folder):
+    if file.endswith(".csv"):
+        file_path = os.path.join(base_folder, file)
+        print(f"Traitement du fichier : {file_path}")
+        
+        try:
+            # Lecture du CSV
+            df_o = pd.read_csv(file_path)
+
+            # Conversion datetime (présent dans les fichiers OMNI)
+            df_o["datetime"] = pd.to_datetime(df_o["datetime"])
+
+            # Sélection et renommage des colonnes
+            df_o = df_o[["datetime", "IMF_Bz_GSM", "SW_speed", "F10.7_flux"]].rename(
+                columns={
+                    "IMF_Bz_GSM": "Bz",
+                    "SW_speed": "V",
+                    "F10.7_flux": "F"
+                }
+            )
+
+            df_list.append(df_o)
+
+        except Exception as e:
+            print(f"Erreur sur le fichier {file}: {e}")
+
+# Concaténer tous les fichiers
+df_omni = pd.concat(df_list, ignore_index=True)
+print("DataFrame OMNI global créé avec", len(df_omni), "lignes.")
